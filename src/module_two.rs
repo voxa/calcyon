@@ -1,3 +1,1 @@
-pub fn anotherfunc() {
-    
-}
+pub fn anotherfunc() {}

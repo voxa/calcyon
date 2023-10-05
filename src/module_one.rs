@@ -1,6 +1,3 @@
-
-
-
 // Example function with its unit tests in the same file
 pub fn add(left: usize, right: usize) -> usize {
     left + right
