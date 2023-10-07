@@ -11,7 +11,7 @@ use calcyon::show_profile::*;
 use calcyon::subscribe_user::*;
 
 #[group]
-#[commands(help)]
+#[commands(help, profile, subscribe)]
 struct General;
 struct Handler;
 
