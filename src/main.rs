@@ -6,10 +6,12 @@ use serenity::model::channel::Message;
 use serenity::prelude::*;
 use std::env;
 
-use calcyon::module_one;
+use calcyon::help_message::*;
+use calcyon::show_profile::*;
+use calcyon::subscribe_user::*;
 
 #[group]
-#[commands(ping)]
+#[commands(help)]
 struct General;
 struct Handler;
 
@@ -38,9 +40,26 @@ async fn main() {
     }
 }
 
+// Help message command
 #[command]
-async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
-    msg.reply(ctx, "Pong!").await?;
+async fn help(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.reply(ctx,help_message()).await?;
+
+    Ok(())
+}
+
+// Show user their linked profile/Tell them to set it up
+#[command]
+async fn profile(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.reply(ctx,show_profile(ctx)).await?;
+    
+    Ok(())
+}
+
+// Subscribe to the current channel
+#[command]
+async fn subscribe(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.reply(ctx, subscribe_user(ctx)).await?;
 
     Ok(())
 }
