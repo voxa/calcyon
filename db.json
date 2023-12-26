@@ -1,0 +1,25 @@
+[
+  {
+    "guilds": {
+      "[guildId]": { 
+        "events": {
+          "[eventId]": {}
+        }
+      }
+    },
+    "users": {
+      "[userId]": {
+        "calendars": {
+          "[calendarToken1]": {
+            "title": "Guild Collection",
+            "guilds": [
+              "[guildId1]",
+              "[guildId2]",
+              "[guildId3]"
+            ]
+          }
+        }
+      }
+    }
+  }
+]
