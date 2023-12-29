@@ -1,4 +1,3 @@
-use dotenv::dotenv;
 use serenity::async_trait;
 use serenity::framework::standard::macros::{command, group};
 use serenity::framework::standard::{CommandResult, StandardFramework};
@@ -7,7 +6,6 @@ use serenity::model::event::{GuildScheduledEventUserAddEvent, GuildScheduledEven
 use serenity::model::guild::ScheduledEvent;
 use serenity::prelude::*;
 use serenity::Client;
-use std::env;
 
 #[group]
 #[commands(ping)]
@@ -48,14 +46,10 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-pub async fn start() {
-    dotenv().ok();
+pub async fn start(token: &str) {
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~")) // Prefix of the bot is '~'
         .group(&GENERAL_GROUP);
-
-    // Login with a bot token from the environment
-    let token = env::var("DISCORD_TOKEN").expect("token");
 
     // TODO - allow gateway intents to get guild scheduled events, guild users
     let intents = GatewayIntents::non_privileged()
