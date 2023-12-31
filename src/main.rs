@@ -1,9 +1,9 @@
 mod bot;
 mod server;
 
-use std::env;
-
 use dotenv::dotenv;
+
+use std::env;
 
 #[tokio::main]
 async fn main() {
@@ -14,6 +14,9 @@ async fn main() {
         env::var("DISCORD_TOKEN").expect("Please provide a Discord token with DISCORD_TOKEN.");
 
     loop {
-        tokio::join!(crate::bot::start(&token), crate::server::start(&token));
+        tokio::join!(
+            crate::bot::start(token.clone()),
+            crate::server::start(token.clone())
+        );
     }
 }

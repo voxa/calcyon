@@ -8,22 +8,14 @@ edition = "2021"
 [dependencies]
 dotenv = "0.15.0"
 serenity = "0.11.6"
-http-body-util = "0.1"
 chrono = "0.4.31"
+warp = "0.3"
 
 [dependencies.tokio]
 version = "1.32.0"
 features = ["rt-multi-thread","macros"]
 
-[dependencies.hyper]
-version = "1"
-features = ["full"]
-
 [dependencies.ical]
 version = "0.9"
 default-features = false
 features = ["ical", "vcard", "generator"]
-
-[dependencies.hyper-util]
-version = "0.1"
-features = ["full"]

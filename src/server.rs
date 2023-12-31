@@ -1,16 +1,12 @@
-use std::{net::SocketAddr, sync::Arc};
-
-use http_body_util::Full;
-use hyper_util::rt::TokioIo;
+use chrono::{prelude::DateTime, Duration, Utc};
 use ical::generator::{Emitter, IcalCalendarBuilder, IcalEventBuilder, Property};
 use serenity::model::guild::ScheduledEvent;
-use tokio::net::TcpListener;
+use warp::{http::Response, reject, Filter};
 
-use hyper::{body::Bytes, server::conn::http1, service::service_fn, Error, Response};
-
-use chrono::{prelude::DateTime, Duration, Utc};
+use serenity::http::Http as DiscordHttp;
 
 fn generate_ical(events: Vec<ScheduledEvent>) -> String {
+    dbg!("Started parsing");
     let fmt = "%Y%m%dT%H%M%S";
 
     let now: String = Utc::now().format(fmt).to_string();
@@ -21,8 +17,6 @@ fn generate_ical(events: Vec<ScheduledEvent>) -> String {
         .build();
 
     for scheduled_event in events {
-        dbg!(&scheduled_event);
-
         let ScheduledEvent {
             id,
             guild_id,
@@ -62,39 +56,39 @@ fn generate_ical(events: Vec<ScheduledEvent>) -> String {
         calendar.events.push(ical_event.build());
     }
 
+    dbg!("Finished parsing");
+
     calendar.generate()
 }
 
-pub async fn start(token: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let addr: SocketAddr = ([127, 0, 0, 1], 3000).into();
+async fn generate_guild_calendar(
+    guild_id: u64,
+    token: String,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let client = DiscordHttp::new(&token);
 
-    let client = Arc::new(serenity::http::Http::new(token));
+    let events = client.get_scheduled_events(guild_id, false).await;
 
-    let listener = TcpListener::bind(addr).await?;
-    println!("Listening on http://{}", addr);
-    loop {
-        let (stream, _) = listener.accept().await?;
-        let io = TokioIo::new(stream);
-
-        let client = client.clone();
-
-        let service = service_fn(move |_req| {
-            let client = client.clone();
-
-            async move {
-                dbg!("Hello!");
-
-                Ok::<_, Error>(Response::new(Full::new(Bytes::from(generate_ical(
-                    client
-                        .get_scheduled_events(0, false)
-                        .await
-                        .unwrap(),
-                )))))
-            }
-        });
-
-        if let Err(err) = http1::Builder::new().serve_connection(io, service).await {
-            println!("Error serving connection: {:?}", err);
-        }
+    match events {
+        Ok(events) => Ok(Response::builder()
+            .header("content-type", "text/calendar")
+            .body(generate_ical(events))),
+        // TODO - implement custom error handling
+        Err(_error) => Err(reject()),
     }
+}
+
+fn with_token(
+    token: String,
+) -> impl Filter<Extract = (String,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || token.clone())
+}
+
+pub async fn start(token: String) {
+    // GET /hello/warp => 200 OK with body "Hello, warp!"
+    let hello = warp::path!("calendar" / "guild" / u64)
+        .and(with_token(token))
+        .and_then(generate_guild_calendar);
+
+    warp::serve(hello).run(([127, 0, 0, 1], 3030)).await;
 }

@@ -46,7 +46,7 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-pub async fn start(token: &str) {
+pub async fn start(token: String) {
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~")) // Prefix of the bot is '~'
         .group(&GENERAL_GROUP);
